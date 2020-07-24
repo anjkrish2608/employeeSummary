@@ -11,77 +11,131 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 const Employee = require("./lib/Employee");
 const Choices = require("inquirer/lib/objects/choices");
-let employeeCount=0;
-
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
-inquirer.prompt([
+// inquirer.registerPrompt("recursive",require("inquirer-recursive"));
+
+//questions
+const employeeQ =[
     {
         name: "name",
-        message:"What is the team member's name?",
-        type:"input"
+        message: "What is the team member's name?",
+        type: "input"
     },
     {
         name: "id",
-        message:"What is the team member's ID?",
-        type:"input"
-    },
+        message: "What is the team member's ID?",
+        type: "input"
+    }
+    ,
     {
         name: "email",
-        message:"What is the team member's email?",
-        type:"input"
-    },{
-        name:"type",
-        message:"Select the type of employee:",
-        type:"list",
-        choices: ["Engineer","Intern","Manager"]
+        message: "What is the team member's email?",
+        type: "input"
     }
-]).then(function(response){
-
-    new Employee(response.name,response.id,response.email);
-    switch(response.type){
-        case "Engineer":
-            inquirer.prompt([
-                {
+];
+const typeOfEmployeeQ=[{
+    name: "type",
+    message: "Select the type of employee:",
+    type: "list",
+    choices: ["Engineer", "Intern", "End of team"]
+}];
+const managerQ= [{
+    name: "name",
+    message: "What is the Manager's name?",
+    type: "input"
+},
+{
+    name: "id",
+    message: "What is the Manager's ID?",
+    type: "input"
+}
+,
+{
+    name: "email",
+    message: "What is the Manager's email?",
+    type: "input"
+},
+{
+    name: "officeNumber",
+    message: "What is the Manager's office number?",
+    type: "number"
+}];
+const engineerQ=[{
                     name: "github",
-                    message:"What is the engineer's github account?",
-                    type:"input" 
-                }
-            ]).then(function(response2){
-                const final={...response,...response2};
-                new Engineer(final.name,final.id,final.email,final.github);
-            });
-        break;
-        case "Intern":
-            inquirer.prompt([
-                {
-                    name: "school",
-                    message:"What is the name of the Intern's school?",
-                    type:"input" 
-                }
-            ]).then(function(response2){
-                const final={...response,...response2};
-                new Intern(final.name,final.id,final.email,final.school);
-            });
-        break;
-        case "Manager":
-            inquirer.prompt([
-                {
-                    name: "officeNumber",
-                    message:"What is the Manager's office number?",
-                    type:"number" 
-                }
-            ]).then(function(response2){
-                const final={...response,...response2};
-                new Manager(final.name,final.id,final.email,final.officeNumber);
-            });
-        break;
-    }
+                    message: "What is the engineer's github account?",
+                    type: "input"
+                }];
+const internQ=[{
+    name: "school",
+    message: "What is the name of the Intern's school?",
+    type: "input"
+}];
+let employeeArr =[];
+//initial function to ask manager details
+var init = () =>{
+    inquirer.prompt(managerQ).then(function ({name,id,email,officeNumber}) {
+        const manager = new Manager(name,id,email,officeNumber);
+        employeeArr.push(manager);
+        createTeam();
+    });
 
-});
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
+}
+
+const createTeam=()=>{
+    
+        inquirer.prompt(typeOfEmployeeQ).then(function({type}){
+            
+            if(type==="Intern"){
+                inquirer.prompt(employeeQ).then(function(ans){
+                createIntern(ans);
+            });
+            }
+            else if(type==="Engineer"){
+                inquirer.prompt(employeeQ).then(function(ans){
+                createEngineer(ans);
+            });
+            }
+            else{
+                renderTime();
+            }
+        });
+    
+}
+
+const createIntern=(data)=>{
+    inquirer.prompt(internQ).then(function({school}){
+        const intern =new Intern(data.name,data.id,data.email,school);
+        employeeArr.push(intern);
+        createTeam();
+    });
+}
+
+
+const createEngineer=(data)=>{
+    inquirer.prompt(engineerQ).then(function({github}){
+        const engineer =new Engineer(data.name,data.id,data.email,github);
+        employeeArr.push(engineer);
+        createTeam();
+    });
+}
+
+const renderTime=()=>{
+    
+    fs.writeFile(outputPath, render(employeeArr),"utf8", function(err) {
+
+        if (err) {
+          return console.log(err);
+        }
+      
+        
+      
+      });
+          
+}
+init();
+
+    
 
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
@@ -89,12 +143,3 @@ inquirer.prompt([
 // Hint: you may need to check if the `output` folder exists and create it if it
 // does not.
 
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```

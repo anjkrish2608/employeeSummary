@@ -1,0 +1,20 @@
+div.card-header{
+    background-color: blueviolet;
+    color: white;
+    text-align: center;
+}
+
+.employee-card, .list-group-item{
+    border-color: violet;
+    border-width: 3px;
+    border-radius: 0 0 5px 5 px;
+    margin:6px
+}
+
+.team-heading{
+    background-color:violet;
+    color: white;
+}
+body{
+    color:blueviolet;
+}
