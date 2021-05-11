@@ -23,7 +23,7 @@
   "dependencies": {
     "inquirer": "^6.3.1",
     "inquirer-recursive": "0.0.6",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "jest": "^24.8.0"
